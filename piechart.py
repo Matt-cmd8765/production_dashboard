@@ -10,7 +10,8 @@ on_time_data = ontime(df)
 on_time_pie = pd.DataFrame(on_time_data, columns=['Team', 'On Time?'])
 # only looking at late or on time. Does not account for team
 pie = on_time_pie.groupby('On Time?').count()
-names = ['Late', 'On time']
+names = ['QC', 'Formulation', 'Assembly', 'Product Release']
 # You get team name and late or on-time as a 2d array here. Team has to be passed as the value
-fig = px.pie(pie, values='Team', names=names)
+fig = px.pie(pie, values=on_time_pie['On Time?'], names=names, hole=.3)
+
 fig.show()

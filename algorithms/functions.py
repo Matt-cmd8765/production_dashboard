@@ -4,13 +4,13 @@ import plotly.graph_objects as go
 
 
 # DF FOR TESTING: 
-df = pd.read_csv('./db/QC_Production_timelines_ (3).csv')
+# df = pd.read_csv('./db/QC_Production_timelines.csv')
 
 # Function to generate in progress table
 def in_progress(df):
     data = []
     # Make the necessary datetime objects
-    df['Start Date'] = pd.to_datetime(df['Start Date'])
+    df['Start Date'] = pd.to_datetime(df['Start Date'], dayfirst=True)
     today = pd.to_datetime(date.today())
     
     for index, row in df.iterrows():
@@ -22,21 +22,39 @@ def in_progress(df):
 # Function to generate release tables
 def release(df):
     data = []
-    df['Due Date'] = pd.to_datetime(df['Due Date'])
+    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
+    df['Completed At'] = pd.to_datetime(df['Completed At'], dayfirst=True)
     today = pd.to_datetime(date.today())
     current_week_num = today.isocalendar()[1]
     # print(type(df['Due Date']))
     for index, row in df.iterrows():
-        if row['Section/Column'] == 'Product Release' and row['Due Date'].isocalendar().week == current_week_num:
+        if row['Section/Column'] == 'Product Release' and pd.notnull(row['Completed At']) and row['Completed At'].isocalendar().week == current_week_num:
             due_date = row['Due Date'].strftime("%d-%m-%Y")
-            data.append([row['Name'], due_date])
+            completion_date = row['Completed At'].strftime("%d-%m-%Y")
+            data.append([row['Name'], due_date, completion_date])
             # print(f"The {row['Name']} release is scheduled for {row['Due Date']}")
     return data
+
+# Function to generate Weekly task comlpetion table
+def weekly(df):
+    data = []
+    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
+    df['Completed At'] = pd.to_datetime(df['Completed At'], dayfirst=True)
+    today = pd.to_datetime(date.today())
+    current_week_num = today.isocalendar()[1]
+    # print(type(df['Due Date']))
+    for index, row in df.iterrows():
+        if pd.notnull(row['Completed At']) and row['Section/Column'] != 'Product Release' and row['Completed At'].isocalendar().week == current_week_num:
+            completion_date = row['Completed At'].strftime("%d-%m-%Y")
+            data.append([row['Name'], row['Section/Column'], completion_date])
+            # print(f"The {row['Name']} release is scheduled for {row['Due Date']}")
+    return data
+
 
 # Function to generate overdue table
 def overdue(df):
     data = []
-    df['Due Date'] = pd.to_datetime(df['Due Date'])
+    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
     today = pd.to_datetime(date.today())
     for index, row in df.iterrows():
         if row['Due Date'] < today and pd.isnull(row['Completed At']):
@@ -49,8 +67,8 @@ def overdue(df):
 def ontime(df):
     data = []
     # Change the due and completion date columns into datetime objects
-    df['Due Date'] = pd.to_datetime(df['Due Date'])
-    df['Completed At'] = pd.to_datetime(df['Completed At'])
+    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
+    df['Completed At'] = pd.to_datetime(df['Completed At'], dayfirst=True)
 
     for index, row in df.iterrows():
         # variables for the if statement 

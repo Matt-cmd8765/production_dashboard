@@ -2,11 +2,11 @@ import pandas as pd
 from datetime import date
 
 df = pd.read_csv('QC_Production_timelines_ (3).csv')
-df['Due Date'] = pd.to_datetime(df['Due Date']).dt.date  
-df['Completed At'] = pd.to_datetime(df['Completed At']).dt.date
-due_date = df['Due Date']
-completion_date = df['Completed At']
-da_diff = due_date[0] - completion_date[4]
+# df['Due Date'] = pd.to_datetime(df['Due Date']).dt.date  
+# df['Completed At'] = pd.to_datetime(df['Completed At']).dt.date
+# due_date = df['Due Date']
+# completion_date = df['Completed At']
+# da_diff = due_date[0] - completion_date[4]
 
 
 # print(da_diff.days)
