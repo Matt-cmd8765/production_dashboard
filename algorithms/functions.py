@@ -1,7 +1,5 @@
 import pandas as pd
 from datetime import date
-import plotly.graph_objects as go
-
 
 # DF FOR TESTING: 
 # df = pd.read_csv('./db/QC_Production_timelines.csv')
@@ -61,6 +59,17 @@ def overdue(df):
             due_date = row['Due Date']
             difference = today - due_date
             data.append([row['Name'], due_date.strftime("%d-%m-%Y"), difference.days])
+    return data
+
+def current_status(df):
+    data=[]
+    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
+    today = pd.to_datetime(date.today())
+    for index, row in df.iterrows():
+        if row['Due Date'] < today and pd.isnull(row['Completed At']):
+            data.append([row['Name'], 'Overdue'])
+        if row['Due Date'] > today and pd.isnull(row['Completed At']):
+            data.append([row['Name'], 'On Time'])
     return data
 
 #Checks for all events completed late in csv
