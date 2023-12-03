@@ -59,38 +59,46 @@ app.layout = dbc.Container([
         dbc.Col(html.Div(children=[
             html.H1(children='In Progress', style={'textAlign':'left'}),
             dcc.Checklist(id='check-list-selection', options=[{'label':i, 'value':i} for i in dataf.Team.unique()], value=['QC','Formulation','Assembly'], inline=True),
-            dash_table.DataTable(data=dataf.to_dict('records'),id='in-progress-table')])),
+            dash_table.DataTable(data=dataf.to_dict('records'),id='in-progress-table')
+            ])),
 
         # Weekly Task Completion Table
         dbc.Col(html.Div(children=[     
             html.H1(children='Weekly Task Completion'),
             dcc.Checklist(id='task_completion_checklist', options=[{'label':i, 'value':i} for i in dataf.Team.unique()], value=['QC','Formulation','Assembly'], inline=True),
-            dash_table.DataTable(data=weekly_table.to_dict('records'),id='task_completion_table')]))
+            dash_table.DataTable(data=weekly_table.to_dict('records'),id='task_completion_table')
+            ]))
     ]),
 
-    # dbc.Row([
-    #     dbc.Col(html.Div(children=[
-              
-    #     ]))
-    # ])
+    dbc.Row([
+        # Weekly Release Table
+        dbc.Col(html.Div(children=[
+            html.H1(children='Weekly Release'),
+            dash_table.DataTable(data=release_table.to_dict('records'))
+            ])),
+        
+        # Overdue Table
+        dbc.Col(html.Div(children=[
+            html.H1(children='OVERDUE'),
+            dash_table.DataTable(data=overdue_table.to_dict('records'))
+        ]))
+    ]),
+
+    dbc.Row([
+        # Piechart for late, on time or early?
+        dbc.Col(html.Div(children=[
+            html.H4('Late, on-time or early?'),
+            dcc.Graph(figure=fig)
+        ])),
+
+        # Piechart for current status
+        dbc.Col(html.Div(children=[
+            html.H4('Current Status'),
+            dcc.Graph(figure=current_fig) 
+        ]))
+    ])
 ])
 
-
-#     html.Div(id='substancediv', children=[
-#     # In-progress table
-#     dbc.Row(
-#         [
-#         # Release table
-#         html.H2(children='Weekly Release'),
-#         dash_table.DataTable(data=release_table.to_dict('records')),
-#         ])
-#     # Overdue Table
-#     html.H2(children='OVERDUE'),
-#     dash_table.DataTable(data=overdue_table.to_dict('records'))])]),
-
-#     # Weekly Task Completion Table
-#     html.H2(children='Weekly Task Completion'),
-#     dash_table.DataTable(data=weekly_table.to_dict('records')),
 
 #     # Pie Chart
 #     html.H4('Late, on-time or early?'),
@@ -122,13 +130,6 @@ def update_table(value):
 def update_table(value):
     new_df = weekly_table[(weekly_table['Team'].isin(value))]
     return new_df.to_dict('records')
-#Update weekly progress table
-# def update_df(town):
-# 	new_df = df1[(df1['region'].isin(town)]
-# # def generate_chart(names):
-#     df = on_time_pie # replace with iyour own data source
-#     fig = px.pie(df, values=on_time_pie.groupby('On Time?').count(), names=names, hole=.3)
-#     return fig
 
 # Run the app
 if __name__ == '__main__':
