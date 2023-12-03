@@ -43,7 +43,7 @@ def weekly(df):
     # print(type(df['Due Date']))
     for index, row in df.iterrows():
         if pd.notnull(row['Completed At']) and row['Section/Column'] != 'Product Release' and row['Completed At'].isocalendar().week == current_week_num:
-            completion_date = row['Completed At'].strftime("%d-%m-%Y")
+            completion_date = row['Completed At'].strftime("%d/%m/%Y")
             data.append([row['Name'], row['Section/Column'], completion_date])
             # print(f"The {row['Name']} release is scheduled for {row['Due Date']}")
     return data
@@ -61,6 +61,7 @@ def overdue(df):
             data.append([row['Name'], due_date.strftime("%d-%m-%Y"), difference.days])
     return data
 
+# Generate current status pie chart 
 def current_status(df):
     data=[]
     df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)

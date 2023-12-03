@@ -26,7 +26,7 @@ on_time_pie = pd.DataFrame(on_time_data, columns=['Team', 'On Time?'])
 # only looking at late, on time or early. Does not account for team
 pie = on_time_pie.groupby('On Time?').count()
 names = ['Early', 'Late', 'On Time']
-# You get team name and late or on-time as a 2d array here. Team has to be passed as the value
+# You gets team name and late or on-time as a 2d array here. Team has to be passed as the value
 fig = px.pie(pie, values='Team', names=names)
 
 # Current Status Pie Chart
@@ -36,58 +36,92 @@ boob = ['Overdue', 'On Time']
 current_fig = px.pie(current_pi, values='Name', names=boob)
 
 # Bootstrap style sheets
-external_stylesheets = [dbc.themes.MINTY]
+external_stylesheets = [dbc.themes.GRID]
 
 # initialize app
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
-app.layout = html.Div(style={'background-image': 'url("/assets/speedx-master-logo.png")', 
+app.layout = dbc.Container([
+    # SpeeDx Header
+    dbc.Row([
+            html.Div(id='background', children=[html.P(children='')],style={'background-image': 'url("/assets/speedx-master-logo.png")', 
                              'background-repeat': 'no-repeat',
                              'background-position': 'top center',
-                             'display':'inline-block',
-                             'padding': '1rem 1rem'},
-    children=[
-    # In-progress table
-    html.H1(children='In Progress', style={'textAlign':'left'}),
-    dcc.Checklist(id='dropdown-selection', options=[{'label':i, 'value':i} for i in dataf.Team.unique()], value=['QC','Formulation'], style={'width': '55%'}, inline=True),
-    dash_table.DataTable(data=dataf.to_dict('records'),id='in-progress-table'),
-    
-    # Release table
-    html.H2(children='Weekly Release'),
-    dash_table.DataTable(data=release_table.to_dict('records')),
+                             'background-color':'#CDF6FF',
+                             'height':'150px',
+                             'border-radius':'6px'
+                             })
+    ]),
+  
+    dbc.Row([
+        # In Progress Table
+        dbc.Col(html.Div(children=[
+            html.H1(children='In Progress', style={'textAlign':'left'}),
+            dcc.Checklist(id='check-list-selection', options=[{'label':i, 'value':i} for i in dataf.Team.unique()], value=['QC','Formulation','Assembly'], inline=True),
+            dash_table.DataTable(data=dataf.to_dict('records'),id='in-progress-table')])),
 
-    # Overdue Table
-    html.H2(children='OVERDUE'),
-    dash_table.DataTable(data=overdue_table.to_dict('records')),
+        # Weekly Task Completion Table
+        dbc.Col(html.Div(children=[     
+            html.H1(children='Weekly Task Completion'),
+            dcc.Checklist(id='task_completion_checklist', options=[{'label':i, 'value':i} for i in dataf.Team.unique()], value=['QC','Formulation','Assembly'], inline=True),
+            dash_table.DataTable(data=weekly_table.to_dict('records'),id='task_completion_table')]))
+    ]),
 
-    # Weekly Task Completion Table
-    html.H2(children='Weekly Task Completion'),
-    dash_table.DataTable(data=weekly_table.to_dict('records')),
-
-    # Pie Chart
-    html.H4('Late, on-time or early?'),
-    dcc.Graph(figure=fig),
-
-    # Current Status Pie Chart
-    html.H4('Current Status'),
-    dcc.Graph(figure=current_fig)
+    # dbc.Row([
+    #     dbc.Col(html.Div(children=[
+              
+    #     ]))
+    # ])
 ])
 
 
+#     html.Div(id='substancediv', children=[
+#     # In-progress table
+#     dbc.Row(
+#         [
+#         # Release table
+#         html.H2(children='Weekly Release'),
+#         dash_table.DataTable(data=release_table.to_dict('records')),
+#         ])
+#     # Overdue Table
+#     html.H2(children='OVERDUE'),
+#     dash_table.DataTable(data=overdue_table.to_dict('records'))])]),
+
+#     # Weekly Task Completion Table
+#     html.H2(children='Weekly Task Completion'),
+#     dash_table.DataTable(data=weekly_table.to_dict('records')),
+
+#     # Pie Chart
+#     html.H4('Late, on-time or early?'),
+#     dcc.Graph(figure=fig),
+
+#     # Current Status Pie Chart
+#     html.H4('Current Status'),
+#     dcc.Graph(figure=current_fig)    
+#     ],style={'display':'inline-block'})
+# ])
+
+
 @callback(
-    Output('in-progress-table', 'data'),
-    Input('dropdown-selection', 'value')
+    [Output('in-progress-table', 'data'),
+    Output('task_completion_table', 'data')],
+    [Input('check-list-selection', 'value'),
+     Input('task_completion_checklist', 'contents')]
 )
 
 #Update in-progress table
-def update_table(value):
+def update_table(value,contents):
 	new_df = dataf[(dataf['Team'].isin(value))]
 	return new_df.to_dict('records')
 
+def update_other_table(valuetwo):
+    new_df = weekly_table[(weekly_table['Team'].isin(valuetwo))]
+    return new_df.to_dict('records')
+#Update weekly progress table
 # def update_df(town):
 # 	new_df = df1[(df1['region'].isin(town)]
 # # def generate_chart(names):
-#     df = on_time_pie # replace with your own data source
+#     df = on_time_pie # replace with iyour own data source
 #     fig = px.pie(df, values=on_time_pie.groupby('On Time?').count(), names=names, hole=.3)
 #     return fig
 
