@@ -1,5 +1,6 @@
-from dash import Dash, html, dcc, callback, Output, Input, dash_table
+from dash import Dash, html, dcc, callback, Output, Input, dash_table, callback_context
 import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 import plotly.express as px
 from datetime import date
 import pandas as pd
@@ -103,19 +104,23 @@ app.layout = dbc.Container([
 
 
 @callback(
-    [Output('in-progress-table', 'data'),
-    Output('task_completion_table', 'data')],
-    [Input('check-list-selection', 'value'),
-     Input('task_completion_checklist', 'contents')]
+    Output('in-progress-table', 'data'),
+    Input('check-list-selection', 'value')
 )
 
 #Update in-progress table
-def update_table(value,contents):
-	new_df = dataf[(dataf['Team'].isin(value))]
-	return new_df.to_dict('records')
+def update_table(value):
+    new_df = dataf[(dataf['Team'].isin(value))]
+    return new_df.to_dict('records')
 
-def update_other_table(valuetwo):
-    new_df = weekly_table[(weekly_table['Team'].isin(valuetwo))]
+@callback(
+    Output('task_completion_table', 'data'),
+    Input('task_completion_checklist', 'value')
+)
+
+#Update weekly completion table
+def update_table(value):
+    new_df = weekly_table[(weekly_table['Team'].isin(value))]
     return new_df.to_dict('records')
 #Update weekly progress table
 # def update_df(town):
