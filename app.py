@@ -23,14 +23,33 @@ overdue_table = pd.DataFrame(overdue_data, columns=['Name', 'Due Date', 'Days Ov
 weekly_table = pd.DataFrame(weekly_data, columns=['Name', 'Team', 'Completion Date'])
 
 # Pie Chart for late, on time or early tracking
-on_time_pie = pd.DataFrame(on_time_data, columns=['Team', 'On Time?'])
-print(on_time_pie)
+on_time_pie = pd.DataFrame(on_time_data, columns=['Team', 'on_time'])
+
+qc_late = sum((on_time_pie.Team == 'QC') & (on_time_pie.on_time == 'late'))
+qc_ontime = sum((on_time_pie.Team == 'QC') & (on_time_pie.on_time == 'on_time'))
+qc_early = sum((on_time_pie.Team == 'QC') & (on_time_pie.on_time == 'early'))
+form_late = sum((on_time_pie.Team == 'Formulation') & (on_time_pie.on_time == 'late'))
+form_ontime = sum((on_time_pie.Team == 'Formulation') & (on_time_pie.on_time == 'on_time'))
+form_early = sum((on_time_pie.Team == 'Formulation') & (on_time_pie.on_time == 'early'))
+asm_late = sum((on_time_pie.Team == 'Assembly') & (on_time_pie.on_time == 'late'))
+asm_ontime = sum((on_time_pie.Team == 'Assembly') & (on_time_pie.on_time == 'on_time'))
+asm_early = sum((on_time_pie.Team == 'Assembly') & (on_time_pie.on_time == 'early'))
+pr_late = sum((on_time_pie.Team == 'Product Release') & (on_time_pie.on_time == 'late'))
+pr_ontime = sum((on_time_pie.Team == 'Product Release') & (on_time_pie.on_time == 'on_time'))
+pr_early = sum((on_time_pie.Team == 'Product Release') & (on_time_pie.on_time == 'early'))
+
+seconddf = [['QC','Late',qc_late],['QC','On Time', qc_ontime], ['QC', 'Early', qc_early], 
+            ['Formulation','Late',form_late],['Formulation','On Time', form_ontime], ['Formulation', 'Early', form_early], 
+            ['Assembly','Late',asm_late],['Assebmly','On Time', asm_ontime], ['Assembly', 'Early', asm_early],
+            ['Product Release','Late',pr_late],['Product Release','On Time', pr_ontime], ['Product Release', 'Early', pr_early]]
+
+pie = pd.DataFrame(seconddf, columns=['Team', 'On Time?', 'Count'])
+# print(pie.loc[pie['Team']==])
 # only looking at late, on time or early. Does not account for team
-pie = on_time_pie.groupby('On Time?').count()
-print(pie)
-names = ['Early', 'Late', 'On Time']
-# You gets team name and late or on-time as a 2d array here. Team has to be passed as the value
-fig = px.pie(pie, values='Team', names=names)
+# pie = on_time_pie.groupby('On Time?').count()
+# names = ['Early', 'Late', 'On Time']
+# # You gets team name and late or on-time as a 2d array here. Team has to be passed as the value
+fig = px.pie(pie, values='Count', names='On Time?')
 
 # Current Status Pie Chart
 current_pie = pd.DataFrame(current_data, columns=['Name', 'Status'])
@@ -89,14 +108,14 @@ app.layout = dbc.Container([
     dbc.Row([
         # Piechart for late, on time or early?
         dbc.Col(html.Div(children=[
-            html.H4('Late, on-time or early?'),
-            dcc.Checklist(id='on-time-pie-checklist', options=[{'label':i, 'value':i} for i in ['QC','Formulation','Assembly']], value=['QC','Formulation','Assembly'], inline=True),
+            html.H1('Late, on-time or early?'),
+            dcc.Checklist(id='names', options=[{'label':i, 'value':i} for i in ['QC','Formulation','Assembly']], value=['QC','Formulation','Assembly'], inline=True),
             dcc.Graph(figure=fig, id='on-time-pie')
         ])),
 
         # Piechart for current status
         dbc.Col(html.Div(children=[
-            html.H4('Current Status'),
+            html.H1('Current Status'),
             dcc.Graph(figure=current_fig) 
         ]))
     ])
@@ -121,6 +140,16 @@ def update_table(value):
 def update_table(value):
     new_df = weekly_table[(weekly_table['Team'].isin(value))]
     return new_df.to_dict('records')
+
+@callback(
+    Output("on-time-pie", "figure"), 
+    Input("names", "value")
+)
+def generate_chart(value):
+    new_df = pie[(pie['Team'].isin(value))]
+    print(new_df)
+    fig = px.pie(new_df, values='Count', names='On Time?')
+    return fig
 
 # Run the app
 if __name__ == '__main__':
