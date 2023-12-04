@@ -24,8 +24,10 @@ weekly_table = pd.DataFrame(weekly_data, columns=['Name', 'Team', 'Completion Da
 
 # Pie Chart for late, on time or early tracking
 on_time_pie = pd.DataFrame(on_time_data, columns=['Team', 'On Time?'])
+print(on_time_pie)
 # only looking at late, on time or early. Does not account for team
 pie = on_time_pie.groupby('On Time?').count()
+print(pie)
 names = ['Early', 'Late', 'On Time']
 # You gets team name and late or on-time as a 2d array here. Team has to be passed as the value
 fig = px.pie(pie, values='Team', names=names)
@@ -58,14 +60,14 @@ app.layout = dbc.Container([
         # In Progress Table
         dbc.Col(html.Div(children=[
             html.H1(children='In Progress', style={'textAlign':'left'}),
-            dcc.Checklist(id='check-list-selection', options=[{'label':i, 'value':i} for i in dataf.Team.unique()], value=['QC','Formulation','Assembly'], inline=True),
+            dcc.Checklist(id='check-list-selection', options=[{'label':i, 'value':i} for i in ['QC','Formulation','Assembly']], value=['QC','Formulation','Assembly'], inline=True),
             dash_table.DataTable(data=dataf.to_dict('records'),id='in-progress-table')
             ])),
 
         # Weekly Task Completion Table
         dbc.Col(html.Div(children=[     
             html.H1(children='Weekly Task Completion'),
-            dcc.Checklist(id='task_completion_checklist', options=[{'label':i, 'value':i} for i in dataf.Team.unique()], value=['QC','Formulation','Assembly'], inline=True),
+            dcc.Checklist(id='task_completion_checklist', options=[{'label':i, 'value':i} for i in ['Formulation','QC','Assembly']], value=['QC','Formulation','Assembly'], inline=True),
             dash_table.DataTable(data=weekly_table.to_dict('records'),id='task_completion_table')
             ]))
     ]),
@@ -88,7 +90,8 @@ app.layout = dbc.Container([
         # Piechart for late, on time or early?
         dbc.Col(html.Div(children=[
             html.H4('Late, on-time or early?'),
-            dcc.Graph(figure=fig)
+            dcc.Checklist(id='on-time-pie-checklist', options=[{'label':i, 'value':i} for i in ['QC','Formulation','Assembly']], value=['QC','Formulation','Assembly'], inline=True),
+            dcc.Graph(figure=fig, id='on-time-pie')
         ])),
 
         # Piechart for current status
@@ -98,18 +101,6 @@ app.layout = dbc.Container([
         ]))
     ])
 ])
-
-
-#     # Pie Chart
-#     html.H4('Late, on-time or early?'),
-#     dcc.Graph(figure=fig),
-
-#     # Current Status Pie Chart
-#     html.H4('Current Status'),
-#     dcc.Graph(figure=current_fig)    
-#     ],style={'display':'inline-block'})
-# ])
-
 
 @callback(
     Output('in-progress-table', 'data'),
