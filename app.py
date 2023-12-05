@@ -1,12 +1,11 @@
 from dash import Dash, html, dcc, callback, Output, Input, dash_table, callback_context
 import dash_bootstrap_components as dbc
-from dash.exceptions import PreventUpdate
 import plotly.express as px
 from datetime import date
 import pandas as pd
 from algorithms.functions import in_progress, release, overdue, ontime, weekly, current_status
 
-df = pd.read_csv('./db/QC_Production_timelines.csv')
+df = pd.read_csv("./db/QC_Production_timelines.csv")
 
 # Fucntions to determine what activities are currently in progress
 data = in_progress(df)
@@ -40,7 +39,7 @@ pr_early = sum((on_time_pie.Team == 'Product Release') & (on_time_pie.on_time ==
 
 seconddf = [['QC','Late',qc_late],['QC','On Time', qc_ontime], ['QC', 'Early', qc_early], 
             ['Formulation','Late',form_late],['Formulation','On Time', form_ontime], ['Formulation', 'Early', form_early], 
-            ['Assembly','Late',asm_late],['Assebmly','On Time', asm_ontime], ['Assembly', 'Early', asm_early],
+            ['Assembly','Late',asm_late],['Assembly','On Time', asm_ontime], ['Assembly', 'Early', asm_early],
             ['Product Release','Late',pr_late],['Product Release','On Time', pr_ontime], ['Product Release', 'Early', pr_early]]
 
 pie = pd.DataFrame(seconddf, columns=['Team', 'On Time?', 'Count'])
@@ -54,7 +53,7 @@ fig = px.pie(pie, values='Count', names='On Time?')
 # Current Status Pie Chart
 current_pie = pd.DataFrame(current_data, columns=['Name', 'Status'])
 current_pi = current_pie.groupby('Status').count()
-boob = ['Overdue', 'On Time']
+boob = ['On Time']
 current_fig = px.pie(current_pi, values='Name', names=boob)
 
 # Bootstrap style sheets

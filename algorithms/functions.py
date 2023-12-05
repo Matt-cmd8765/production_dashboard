@@ -2,13 +2,13 @@ import pandas as pd
 from datetime import date
 
 # DF FOR TESTING: 
-# df = pd.read_csv('./db/QC_Production_timelines.csv')
+# df = pd.read_csv('QC_Production_timelines.csv')
 
-# Function to generate in progress table
+# Function to generate in progress table OK
 def in_progress(df):
     data = []
     # Make the necessary datetime objects
-    df['Start Date'] = pd.to_datetime(df['Start Date'], dayfirst=True)
+    df['Start Date'] = pd.to_datetime(df['Start Date'])
     today = pd.to_datetime(date.today())
     
     for index, row in df.iterrows():
@@ -17,33 +17,33 @@ def in_progress(df):
             # print(f"The {row['Section/Column']} {row['Name']} event is in progress due date is {row['Due Date']}")
     return data
 
-# Function to generate release tables
+# Function to generate release tables OK but has the time
 def release(df):
     data = []
-    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
-    df['Completed At'] = pd.to_datetime(df['Completed At'], dayfirst=True)
+    df['Due Date'] = pd.to_datetime(df['Due Date']).dt.date
+    df['Completed At'] = pd.to_datetime(df['Completed At']).dt.date
     today = pd.to_datetime(date.today())
     current_week_num = today.isocalendar()[1]
     # print(type(df['Due Date']))
     for index, row in df.iterrows():
         if row['Section/Column'] == 'Product Release' and pd.notnull(row['Completed At']) and row['Completed At'].isocalendar().week == current_week_num:
-            due_date = row['Due Date'].strftime("%d-%m-%Y")
-            completion_date = row['Completed At'].strftime("%d-%m-%Y")
+            due_date = row['Due Date']
+            completion_date = row['Completed At']
             data.append([row['Name'], due_date, completion_date])
-            # print(f"The {row['Name']} release is scheduled for {row['Due Date']}")
+            # print(f"The {row['Name']} release was released on {row['Completed At']}")
     return data
 
-# Function to generate Weekly task comlpetion table
+# Function to generate Weekly task comlpetion table OK but has time
 def weekly(df):
     data = []
-    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
-    df['Completed At'] = pd.to_datetime(df['Completed At'], dayfirst=True)
+    df['Due Date'] = pd.to_datetime(df['Due Date']).dt.date
+    df['Completed At'] = pd.to_datetime(df['Completed At']).dt.date
     today = pd.to_datetime(date.today())
     current_week_num = today.isocalendar()[1]
     # print(type(df['Due Date']))
     for index, row in df.iterrows():
         if pd.notnull(row['Completed At']) and row['Section/Column'] != 'Product Release' and row['Completed At'].isocalendar().week == current_week_num:
-            completion_date = row['Completed At'].strftime("%d/%m/%Y")
+            completion_date = row['Completed At']
             data.append([row['Name'], row['Section/Column'], completion_date])
             # print(f"The {row['Name']} release is scheduled for {row['Due Date']}")
     return data
@@ -52,19 +52,19 @@ def weekly(df):
 # Function to generate overdue table
 def overdue(df):
     data = []
-    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
+    df['Due Date'] = pd.to_datetime(df['Due Date'])
     today = pd.to_datetime(date.today())
     for index, row in df.iterrows():
         if row['Due Date'] < today and pd.isnull(row['Completed At']):
             due_date = row['Due Date']
             difference = today - due_date
-            data.append([row['Name'], due_date.strftime("%d-%m-%Y"), difference.days])
+            data.append([row['Name'], due_date, difference.days])
     return data
 
 # Generate current status pie chart 
 def current_status(df):
     data=[]
-    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
+    df['Due Date'] = pd.to_datetime(df['Due Date'])
     today = pd.to_datetime(date.today())
     for index, row in df.iterrows():
         if row['Due Date'] < today and pd.isnull(row['Completed At']):
@@ -77,8 +77,8 @@ def current_status(df):
 def ontime(df):
     data = []
     # Change the due and completion date columns into datetime objects
-    df['Due Date'] = pd.to_datetime(df['Due Date'], dayfirst=True)
-    df['Completed At'] = pd.to_datetime(df['Completed At'], dayfirst=True)
+    df['Due Date'] = pd.to_datetime(df['Due Date'])
+    df['Completed At'] = pd.to_datetime(df['Completed At'])
 
     for index, row in df.iterrows():
         # variables for the if statement 
@@ -122,4 +122,3 @@ def on_time_checker(df):
         completion_date = row['Completed At']
         if due_date == completion_date:
             print(f"The {row['Section/Column']} {row['Name']} event was completed on time. Nice!")
-
