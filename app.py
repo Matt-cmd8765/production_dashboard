@@ -67,6 +67,8 @@ external_stylesheets = [dbc.themes.GRID]
 # initialize app
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
+server = app.server
+
 app.layout = dbc.Container([
     # SpeeDx Header
     dbc.Row([
