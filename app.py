@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 from datetime import date
 import pandas as pd
-from algorithms.functions import in_progress, release, overdue, ontime, weekly, current_status
+from algorithms.functions import in_progress, release, overdue, ontime, weekly, current_status, upcoming_release
 
 # Enter data here. 
 df = pd.read_csv("./db/QC_Production_timelines.csv")
@@ -15,12 +15,14 @@ overdue_data = overdue(df)
 on_time_data = ontime(df)
 weekly_data = weekly(df)
 current_data = current_status(df)
+upcoming_release_data = upcoming_release(df)
 
 # Transform the 2d data array into dataframe
 dataf = pd.DataFrame(data, columns = ['Team', 'Activity', 'Due Date'])
 release_table = pd.DataFrame(release_data, columns=['Name', 'Due Date', 'Completion Date'])
 overdue_table = pd.DataFrame(overdue_data, columns=['Name', 'Due Date', 'Days Overdue'])
 weekly_table = pd.DataFrame(weekly_data, columns=['Name', 'Team', 'Completion Date'])
+upcoming_release_table = pd.DataFrame(upcoming_release_data, columns=['Name', 'Due Date'])
 
 # Pie Chart for late, on time or early tracking
 on_time_pie = pd.DataFrame(on_time_data, columns=['Team', 'on_time'])
@@ -53,7 +55,7 @@ fig = px.pie(pie, values='Count', names='On Time?')
 current_pie = pd.DataFrame(current_data, columns=['Name', 'Status'])
 current_pi = current_pie.groupby('Status').count()
 # Condition needed in case there on no overdue tasks
-if 'Overdue' in current_pi.values:
+if 'Overdue' in current_pie['Status'].values:
     current_pi_names = ['Overdue','On Time']
     current_fig = px.pie(current_pi, values='Name', names=current_pi_names)
 else:
@@ -62,10 +64,10 @@ else:
 
 
 # Bootstrap style sheets
-external_stylesheets = [dbc.themes.GRID]
+# external_stylesheets = [dbc.themes.GRID]
 
 # initialize app
-app = Dash(__name__, external_stylesheets=external_stylesheets)
+app = Dash(__name__, external_stylesheets=[dbc.themes.GRID])
 
 server = app.server
 
@@ -106,12 +108,15 @@ app.layout = dbc.Container([
 
         # Overdue Table
         dbc.Col(html.Div(children=[html.H1(children='OVERDUE'), 
-            html.H3(children='Everything on time boss!'), 
             html.Img(src='/assets/on-time.png') if overdue_data == [] 
             else
-            html.H1(children='OVERDUE'),
             dash_table.DataTable(data=overdue_table.to_dict('records'))
-        ]))
+        ])),
+
+        dbc.Col(html.Div(children=[
+            html.H1(children='Upcoming Release'),
+            dash_table.DataTable(data=upcoming_release_table.to_dict('records'))
+            ]))
     ]),
 
     dbc.Row([

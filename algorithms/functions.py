@@ -17,7 +17,7 @@ def in_progress(df):
             # print(f"The {row['Section/Column']} {row['Name']} event is in progress due date is {row['Due Date']}")
     return data
 
-# Function to generate release tables OK but has the time
+# Function to generate release tables
 def release(df):
     data = []
     df['Due Date'] = pd.to_datetime(df['Due Date']).dt.date
@@ -30,6 +30,18 @@ def release(df):
             due_date = row['Due Date']
             completion_date = row['Completed At']
             data.append([row['Name'], due_date, completion_date])
+            # print(f"The {row['Name']} release was released on {row['Completed At']}")
+    return data
+
+# Function to generate upcoming release table
+def upcoming_release(df):
+    data = []
+    df['Due Date'] = pd.to_datetime(df['Due Date']).dt.date
+    # print(type(df['Due Date']))
+    for index, row in df.iterrows():
+        if row['Section/Column'] == 'Product Release' and pd.isnull(row['Completed At']):
+            due_date = row['Due Date']
+            data.append([row['Name'], due_date])
             # print(f"The {row['Name']} release was released on {row['Completed At']}")
     return data
 
@@ -53,12 +65,13 @@ def weekly(df):
 def overdue(df):
     data = []
     df['Due Date'] = pd.to_datetime(df['Due Date'])
+    df['Completed At'] = pd.to_datetime(df['Completed At'])
     today = pd.to_datetime(date.today())
     for index, row in df.iterrows():
         if row['Due Date'] < today and pd.isnull(row['Completed At']):
             due_date = row['Due Date']
             difference = today - due_date
-            data.append([row['Name'], due_date, difference.days])
+            data.append([row['Name'], due_date.strftime("%d-%m-%Y"), difference.days])
     return data
 
 # Generate current status pie chart 
