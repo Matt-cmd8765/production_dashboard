@@ -2,7 +2,7 @@
 This dashboard takes and analyzes data from an Asana csv file. It is specific for my company and the layout and design may not be applicable to all. 
 
 ## To Use
-Save the .csv file into the db directory and update the path in app.py and save it as the variable df.
+Save the .csv file as 'QC_Production_timelines.csv' into the db directory and update the path in app.py and save it as the variable df.
 
 ## Python and Libraries info
 
