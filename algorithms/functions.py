@@ -13,7 +13,10 @@ def in_progress(df):
     
     for index, row in df.iterrows():
         if row['Start Date'] <= today and pd.isnull(row['Completed At']):
-            data.append([row['Section/Column'], row['Name'], row['Due Date']])
+            if row['Section/Column'] == 'QC Incoming Test' or row['Section/Column'] == 'QC Quality Final Test':
+                data.append(['QC', row['Name'], row['Due Date']])
+            else:
+                data.append([row['Section/Column'], row['Name'], row['Due Date']])
             # print(f"The {row['Section/Column']} {row['Name']} event is in progress due date is {row['Due Date']}")
     return data
 
@@ -56,7 +59,10 @@ def weekly(df):
     for index, row in df.iterrows():
         if pd.notnull(row['Completed At']) and row['Section/Column'] != 'Product Release' and row['Completed At'].isocalendar().week == current_week_num:
             completion_date = row['Completed At']
-            data.append([row['Name'], row['Section/Column'], completion_date])
+            if row['Section/Column'] == 'QC Incoming Test' or row['Section/Column'] == 'QC Quality Final Test':
+                data.append([row['Name'], 'QC', completion_date])
+            else:
+                data.append([row['Name'], row['Section/Column'], completion_date])
             # print(f"The {row['Name']} release is scheduled for {row['Due Date']}")
     return data
 
@@ -99,11 +105,21 @@ def ontime(df):
         completion_date = row['Completed At']
 
         if due_date < completion_date:
-            data.append([row['Section/Column'],'late'])
+            if row['Section/Column'] == 'QC Incoming Test' or row['Section/Column'] == 'QC Quality Final Test':
+                data.append(['QC', 'late'])
+            else:
+                data.append([row['Section/Column'],'late'])
         if due_date == completion_date:
-            data.append([row['Section/Column'], 'on_time'])
+            if row['Section/Column'] == 'QC Incoming Test' or row['Section/Column'] == 'QC Quality Final Test':
+                data.append(['QC', 'on_time'])
+            else:
+                data.append([row['Section/Column'],'on_time'])
         if due_date > completion_date:
-            data.append([row['Section/Column'], 'early'])
+            if row['Section/Column'] == 'QC Incoming Test' or row['Section/Column'] == 'QC Quality Final Test':
+                data.append(['QC', 'early'])
+            else:
+                data.append([row['Section/Column'],'early'])
+    print(data)
     return data            
 
 
