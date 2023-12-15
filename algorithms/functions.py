@@ -48,6 +48,16 @@ def upcoming_release(df):
             # print(f"The {row['Name']} release was released on {row['Completed At']}")
     return data
 
+def upcoming_component_release(df):
+    data = []
+    df['Due Date'] = pd.to_datetime(df['Due Date']).dt.date
+    for index, row in df.iterrows():
+        if row['Section/Column'] == 'Raw Material Release' and pd.isnull(row['Completed At']):
+            due_date = row['Due Date']
+            data.append([row['Name'], due_date])
+    return data
+
+
 # Function to generate Weekly task comlpetion table OK but has time
 def weekly(df):
     data = []

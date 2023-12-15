@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 from datetime import date
 import pandas as pd
-from algorithms.functions import in_progress, release, overdue, ontime, weekly, current_status, upcoming_release
+from algorithms.functions import in_progress, release, overdue, ontime, weekly, current_status, upcoming_release, upcoming_component_release
 
 # Enter data here. 
 df = pd.read_csv("./db/QC_Production_timelines.csv")
@@ -16,6 +16,7 @@ on_time_data = ontime(df)
 weekly_data = weekly(df)
 current_data = current_status(df)
 upcoming_release_data = upcoming_release(df)
+upcoming_component_release_data = upcoming_component_release(df)
 
 # Transform the 2d data array into dataframe
 dataf = pd.DataFrame(data, columns = ['Team', 'Activity', 'Due Date'])
@@ -23,6 +24,7 @@ release_table = pd.DataFrame(release_data, columns=['Name', 'Due Date', 'Complet
 overdue_table = pd.DataFrame(overdue_data, columns=['Name', 'Due Date', 'Days Overdue'])
 weekly_table = pd.DataFrame(weekly_data, columns=['Name', 'Team', 'Completion Date'])
 upcoming_release_table = pd.DataFrame(upcoming_release_data, columns=['Name', 'Due Date'])
+upcoming_component_release_table = pd.DataFrame(upcoming_component_release_data, columns=['Name', 'Due Date'])
 
 # Pie Chart for late, on time or early tracking
 on_time_pie = pd.DataFrame(on_time_data, columns=['Team', 'on_time'])
@@ -64,10 +66,10 @@ else:
 
 
 # Bootstrap style sheets
-# external_stylesheets = [dbc.themes.GRID]
+external_stylesheets = [dbc.themes.GRID]
 
 # initialize app
-app = Dash(__name__, external_stylesheets=[dbc.themes.GRID])
+app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 
 
@@ -88,35 +90,40 @@ app.layout = dbc.Container([
         dbc.Col(html.Div(children=[
             html.H1(children='In Progress', style={'textAlign':'left'}),
             dcc.Checklist(id='check-list-selection', options=['QC','Formulation','Assembly'], value=['QC','Formulation','Assembly'], inline=True),
-            dash_table.DataTable(data=dataf.to_dict('records'),id='in-progress-table')
-            ])),
+            dash_table.DataTable(data=dataf.to_dict('records'),id='in-progress-table',style_cell={'text-align':'center'})
+            ]),md=4),
+
+        # Overdue Table
+        dbc.Col(html.Div(children=[html.H1(children='OVERDUE'), 
+            html.H4(children='Nothing Overdue!'),html.Img(src='/assets/on-time.png') if overdue_data == [] 
+            else
+            dash_table.DataTable(data=overdue_table.to_dict('records'),style_cell={'text-align':'center'})
+        ]),md=4),
 
         # Weekly Task Completion Table
         dbc.Col(html.Div(children=[     
             html.H1(children='Weekly Task Completion'),
             dcc.Checklist(id='task_completion_checklist', options=['QC','Formulation','Assembly'], value=['QC','Formulation','Assembly'], inline=True),
-            dash_table.DataTable(data=weekly_table.to_dict('records'),id='task_completion_table')
-            ]))
+            dash_table.DataTable(data=weekly_table.to_dict('records'),id='task_completion_table',style_cell={'text-align':'center'})
+        ]),md=4)
     ]),
 
     dbc.Row([
         # Weekly Release Table
         dbc.Col(html.Div(children=[
-            html.H1(children='Weekly Release'),
-            dash_table.DataTable(data=release_table.to_dict('records')),
-            ])),
-
-        # Overdue Table
-        dbc.Col(html.Div(children=[html.H1(children='OVERDUE'), 
-            html.Img(src='/assets/on-time.png') if overdue_data == [] 
-            else
-            dash_table.DataTable(data=overdue_table.to_dict('records'))
-        ])),
+            html.H1(children='Weekly Completed Release'),
+            dash_table.DataTable(data=release_table.to_dict('records'),style_cell={'text-align':'center'}),
+            ]),md=4),
 
         dbc.Col(html.Div(children=[
-            html.H1(children='Upcoming Release'),
-            dash_table.DataTable(data=upcoming_release_table.to_dict('records'))
-            ]))
+            html.H1(children='Future Component Release'),
+            dash_table.DataTable(data=upcoming_component_release_table.to_dict('records'),style_cell={'text-align':'center'})
+            ]),md=4),
+
+        dbc.Col(html.Div(children=[
+            html.H1(children='Future Product Release'),
+            dash_table.DataTable(data=upcoming_release_table.to_dict('records'), style_cell={'text-align':'center'})
+            ]),md=4)
     ]),
 
     dbc.Row([
