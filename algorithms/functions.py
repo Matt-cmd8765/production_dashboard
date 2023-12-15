@@ -119,7 +119,6 @@ def ontime(df):
                 data.append(['QC', 'early'])
             else:
                 data.append([row['Section/Column'],'early'])
-    print(data)
     return data            
 
 
@@ -137,7 +136,7 @@ def early_checker(df):
 
         if due_date > completion_date:
             diff = due_date - completion_date
-            print(f"The {row['Name']} event was early by { diff.days } day(s). Hooray!")
+            #print(f"The {row['Name']} event was early by { diff.days } day(s). Hooray!")
 
 def on_time_checker(df):
 

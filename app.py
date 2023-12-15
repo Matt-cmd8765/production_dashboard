@@ -69,7 +69,7 @@ else:
 # initialize app
 app = Dash(__name__, external_stylesheets=[dbc.themes.GRID])
 
-server = app.server
+
 
 app.layout = dbc.Container([
     # SpeeDx Header
@@ -165,6 +165,8 @@ def generate_chart(value):
     fig = px.pie(new_df, values='Count', names='On Time?')
     return fig
 
-# Run the app
+# Run the app on local wifi
+server = app.server
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run_server(host="0.0.0.0", port="8050")
